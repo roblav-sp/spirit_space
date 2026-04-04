@@ -1,0 +1,56 @@
+# Build
+build/
+out/
+cmake-build-*/
+*.o
+*.obj
+*.exe
+*.dll
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.a
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+Makefile
+*.cmake
+!CMakeLists.txt
+
+# vcpkg
+vcpkg_installed/
+.vcpkg/
+
+# IDE
+.vs/
+.vscode/settings.json
+.idea/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# Data (large files — use download scripts instead)
+data/raw/
+data/cache/
+*.fits
+*.fit
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test artifacts
+Testing/
+CTestTestfile.cmake
+LastTest.log
+
+# Logs
+*.log
