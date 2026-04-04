@@ -1,6 +1,6 @@
 # Spirit Space — Sprint Plan
 
-> Status: **Draft**
+> Status: **Draft v0.2**
 > Last updated: 2026-04-04
 
 Each sprint has a goal, feature specs, acceptance criteria, required unit tests, and a QA audit gate. No sprint begins until the previous sprint's QA audit is signed off by the project owner.
@@ -272,13 +272,99 @@ Each sprint has a goal, feature specs, acceptance criteria, required unit tests,
 
 ---
 
-## Future Sprints (9+)
+## Sprint 8 — Game States
 
-- Audio (engine hum, warp sound, ambient space)
-- Procedural planet surface textures (FastNoise2)
-- Asteroid fields and debris simulation
-- Additional game mechanics (TBD by project owner)
-- Save/load system
+**Goal**: Main menu, pause screen, save/load system, game over screen.
+
+### Features
+- Main menu: New Game, Load Game, Settings, Quit
+- New Game spawns player in Earth orbit facing the Sun
+- Pause menu: Resume, Save, Settings, Quit to Menu
+- Save system: serializes position, orientation, ship state, energy, in-game date, hull %
+- Load Game: restores full state from save file (JSON)
+- Game Over screen: triggered when hull = 0%, shows "SHIP DESTROYED", option to reload last save
+- Settings screen: graphics quality, audio volume, control bindings (fully remappable), ship config
+
+### Acceptance Criteria
+- [ ] Main menu renders and all options function correctly
+- [ ] New Game places ship in Earth low orbit (~400 km), facing Sun
+- [ ] Save/load round-trip preserves position within epsilon and all ship stats
+- [ ] Game Over triggered at hull 0%, reload restores last save correctly
+- [ ] Settings changes persist across sessions (written to `config/game.json`)
+- [ ] All control bindings remappable via Settings UI
+
+### Unit Tests
+- `test_save_load`: serialize and deserialize game state, assert field equality
+- `test_spawn`: verify spawn position is within Earth orbit bounds
+- `test_config_write`: settings change written to disk, reloaded correctly
+
+### QA Audit Gate — Sprint 8
+**Human review required.**
+- [ ] Owner plays full loop: menu → new game → fly → save → quit → load → verify state
+- [ ] Owner tests game over condition and reload
+- [ ] Owner reviews Settings UI — confirms all options present and functional
+
+---
+
+## Sprint 9 — Multiple Ships
+
+**Goal**: Config-driven ship definitions; ship selector at main menu.
+
+### Features
+- `config/ships.json` defines all ship types with stat profiles
+- Ship selector screen at main menu (before New Game)
+- Stats shown per ship: energy pool, regen rate, warp efficiency, shield strength, agility
+- Ships differ meaningfully — combat-oriented vs exploration-oriented profiles
+- At least 3 starter ships defined
+
+### Acceptance Criteria
+- [ ] `config/ships.json` loads cleanly; missing/malformed fields caught with clear error
+- [ ] Ship selector shows all defined ships with stats
+- [ ] Selecting a ship correctly applies its stats to the energy/shield/warp systems
+- [ ] Adding a new ship to `config/ships.json` requires no code changes
+
+### Unit Tests
+- `test_ship_config_parse`: parse ships.json, assert all required fields present for each ship
+- `test_ship_stats_apply`: selecting a ship correctly populates ship system values
+
+### QA Audit Gate — Sprint 9
+**Human review required.**
+- [ ] Owner reviews all ship stat profiles — balance feels reasonable
+- [ ] Owner confirms ship selection is clear and readable
+- [ ] Owner adds a custom ship to config manually and verifies it appears in-game
+
+---
+
+## Sprint 10 — Weapons & Combat
+
+**Goal**: Energy weapons; hull damage when shields collapse; in-system subsystem damage.
+
+*Detailed spec to be written when Sprint 9 is complete.*
+
+---
+
+## Sprint 11 — Audio
+
+**Goal**: Ambient space audio, ship engine sounds, warp effects, UI audio.
+
+**Asset sources** (no recording studio required):
+- Ambient / music: Meta AudioCraft / MusicGen (AI, local, free)
+- Engine hum, warp, impacts: Freesound.org (CC-licensed) or ElevenLabs Sound Effects
+- UI sounds: Freesound.org
+
+*Detailed spec to be written when Sprint 10 is complete.*
+
+---
+
+## Future Sprints (12+)
+
+- Procedural planet surface detail (FastNoise2 or stb_perlin)
+- Asteroid field simulation
+- LOD tuning and full performance QA pass
+- Third-person external camera (architecture hook in place from Sprint 3)
+- Satellite toggle (ISS, Hubble visible near Earth)
+- Landing mode (architecture hook in place from Sprint 3 — requires atmosphere entry model)
+- Additional game mechanics (TBD)
 
 ---
 
