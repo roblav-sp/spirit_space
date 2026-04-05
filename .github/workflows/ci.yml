@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build & Test — Windows MSVC
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # vcpkg is pre-installed on windows-latest at C:\vcpkg
+      - name: Bootstrap vcpkg
+        run: C:\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+        shell: cmd
+
+      # Cache vcpkg installed packages (keyed on vcpkg.json)
+      - name: Cache vcpkg packages
+        uses: actions/cache@v4
+        with:
+          path: C:\vcpkg\installed
+          key: vcpkg-windows-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-windows-
+
+      # Install vcpkg dependencies listed in vcpkg.json
+      - name: Install vcpkg dependencies
+        run: C:\vcpkg\vcpkg.exe install --triplet x64-windows
+        shell: cmd
+        working-directory: ${{ github.workspace }}
+
+      # Configure
+      - name: Configure CMake
+        run: |
+          cmake -B build -S . `
+            -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DVCPKG_TARGET_TRIPLET=x64-windows
+        shell: pwsh
+
+      # Build
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      # Test
+      - name: Run Tests
+        run: ctest --test-dir build -C Release --output-on-failure --parallel 4
+
+      # Validate shaders (no shaders yet — runs clean)
+      - name: Validate GLSL shaders
+        run: |
+          if (Test-Path "src/shaders") {
+            Get-ChildItem -Path "src/shaders" -Recurse -Include "*.vert","*.frag","*.glsl" |
+            ForEach-Object {
+              glslangValidator $_.FullName
+              if ($LASTEXITCODE -ne 0) { exit 1 }
+            }
+          } else {
+            Write-Host "No shaders yet — skipping validation."
+          }
+        shell: pwsh
+
+  # Future: add Linux build once cross-platform is needed
+  # build-linux:
+  #   runs-on: ubuntu-latest

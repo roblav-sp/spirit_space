@@ -1,0 +1,50 @@
+{
+  "_comment": "Spirit Space — ship definitions. Add ships here; no recompile needed.",
+  "ships": [
+    {
+      "id": "explorer",
+      "name": "Horizon",
+      "description": "Balanced explorer. High warp efficiency, moderate combat stats.",
+      "stats": {
+        "max_energy": 1000.0,
+        "energy_regen_rate": 25.0,
+        "warp_efficiency": 1.0,
+        "shield_strength": 500.0,
+        "weapon_power": 50.0,
+        "agility": 1.0,
+        "sensor_range_ly": 1.0,
+        "tech_slots": 4
+      }
+    },
+    {
+      "id": "combat",
+      "name": "Vanguard",
+      "description": "Heavy combat ship. Strong shields and weapons, lower warp range.",
+      "stats": {
+        "max_energy": 1500.0,
+        "energy_regen_rate": 30.0,
+        "warp_efficiency": 0.6,
+        "shield_strength": 1200.0,
+        "weapon_power": 150.0,
+        "agility": 0.7,
+        "sensor_range_ly": 0.8,
+        "tech_slots": 3
+      }
+    },
+    {
+      "id": "scout",
+      "name": "Whisper",
+      "description": "Fast scout. Exceptional warp efficiency and sensors, minimal combat.",
+      "stats": {
+        "max_energy": 700.0,
+        "energy_regen_rate": 20.0,
+        "warp_efficiency": 1.8,
+        "shield_strength": 200.0,
+        "weapon_power": 20.0,
+        "agility": 1.6,
+        "sensor_range_ly": 2.5,
+        "tech_slots": 2
+      }
+    }
+  ]
+}

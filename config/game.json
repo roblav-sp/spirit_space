@@ -1,0 +1,52 @@
+{
+  "_comment": "Spirit Space — runtime configuration. Source of truth for all tunable values.",
+  "version": "0.1.0",
+
+  "graphics": {
+    "width": 1920,
+    "height": 1080,
+    "fullscreen": false,
+    "quality": "medium",
+    "vsync": true,
+    "fov_degrees": 90.0
+  },
+
+  "audio": {
+    "master_volume": 1.0,
+    "music_volume": 0.8,
+    "sfx_volume": 1.0,
+    "ambient_volume": 0.6
+  },
+
+  "controls": {
+    "forward":    "W",
+    "backward":   "S",
+    "strafe_left": "A",
+    "strafe_right": "D",
+    "roll_left":  "Q",
+    "roll_right": "E",
+    "thrust_up":  "R",
+    "thrust_down": "F",
+    "warp_engage": "SPACE",
+    "map_toggle":  "M",
+    "pause":       "ESCAPE",
+    "time_warp_up": "PERIOD",
+    "time_warp_down": "COMMA"
+  },
+
+  "flight": {
+    "damping_linear": 0.85,
+    "damping_angular": 0.80,
+    "deadzone": 0.05,
+    "max_speed_ms": 1000.0
+  },
+
+  "time": {
+    "warp_multipliers": [1, 10, 100, 1000, 10000]
+  },
+
+  "lod": {
+    "star_render_radius_ly": 100.0,
+    "planet_detail_distance_au": 5.0
+  }
+}
