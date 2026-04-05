@@ -1,6 +1,6 @@
 # Spirit Space — Project Summary
 
-> Version: 0.3 — 2026-04-04
+> Version: 0.4 — 2026-04-04
 
 ---
 
@@ -10,18 +10,53 @@ Spirit Space is a realistic space simulation game built on real astronomical dat
 
 ---
 
+## Development Philosophy — Simulation First
+
+The project is built in **two distinct phases**:
+
+**Phase 1 — Space Simulation** is completed and stable before any game mechanics are introduced. The result is a fully functional real-universe simulation: accurate stars, real planet positions, all flight modes, time control, and free exploration. This phase produces **Sandbox Mode** — a clean, gameplay-free experience that stands on its own.
+
+**Phase 2 — Game Layer** adds all gameplay on top of the proven simulation foundation: energy systems, combat, alien factions, tech progression, and the Spirit Realm. This produces **Game Mode**.
+
+The two modes coexist in the shipped product. Sandbox Mode is never removed — it remains the pure simulation experience.
+
+---
+
+## Application Modes
+
+### Sandbox Mode
+- Pure space simulation — no aliens, no combat, no energy management, no damage
+- Free exploration of the real universe using all three flight modes
+- Real star field (HYG 119k+ stars), Solar System with live ephemeris positions
+- Time warp: watch orbital mechanics in real time
+- Minimap, galaxy map, contextual HUD (nearest body, speed, position)
+- Save and restore position
+- Target audience: anyone who wants to explore real space data
+
+### Game Mode
+- Everything in Sandbox Mode, plus all gameplay systems
+- Energy pool, shields, hull damage, weapons
+- Alien civilisations — Federation (80% friendly) and aggressive (20%)
+- Faction reputation, tech gifts, Earth R&D, technology tree
+- Spirit Realm layer — parallel dimension with additional visual layer and content
+- Game states: main menu, ship selection, save/load full game state, game over
+
+The mode is selected at the main menu. Both modes use the same simulation engine and world data.
+
+---
+
 ## Core Pillars
 
-| Pillar | Description |
-|---|---|
-| **Real Data** | Stars, planets, and exoplanets rendered from actual agency datasets |
-| **Authentic Visuals** | Star color and size derived from spectral class and luminosity data |
-| **Layered Flight** | Three distinct flight modes based on proximity and speed |
-| **Energy Strategy** | One energy pool shared between propulsion, shields, and weapons |
-| **Two Realms** | Normal space and the Spirit Realm — same map, different layer, different rules |
-| **Faction Diplomacy** | Reputation with alien civilisations shapes what you can access and who attacks you |
-| **Technology Progression** | Alien gifts and Earth R&D unlock new ship capabilities over time |
-| **Exploration First** | Discovery and traversal are the primary gameplay loops |
+| Pillar | Phase | Description |
+|---|---|---|
+| **Real Data** | 1 | Stars, planets, exoplanets from agency datasets |
+| **Authentic Visuals** | 1 | Star color/size from spectral class and luminosity |
+| **Layered Flight** | 1 | Three flight modes based on proximity and speed |
+| **Exploration First** | 1 | Discovery and traversal as primary loop |
+| **Energy Strategy** | 2 | One energy pool shared between propulsion, shields, weapons |
+| **Two Realms** | 2 | Normal space + Spirit Realm — same map, layered |
+| **Faction Diplomacy** | 2 | Reputation with alien civilisations shapes access and threat |
+| **Technology Progression** | 2 | Alien gifts + Earth R&D unlock ship capabilities |
 
 ---
 
@@ -412,27 +447,49 @@ New ships and tech upgrades added without recompiling.
 5. **Next Sprint** → only after QA sign-off
 
 ### Sprint Roadmap
-| Sprint | Focus |
-|---|---|
-| 0 | Repo, build pipeline, data download + validation, empty window |
-| 1 | Star field — HYG data, spectral color, size, LOD benchmarking |
-| 2 | Solar System — Horizons, planets/moons, orbital rings, skybox |
-| 3 | Planetary flight — Mode 3, 6-DOF, config file, gravity warning |
-| 4 | System Warp — Mode 2, solar minimap, warp curve, time warp |
-| 5 | Super Warp — Mode 1, star map, LY filter, tunnel effect |
-| 6 | Energy & Shield — pool, allocation UI, bubble, damage model |
-| 7 | HUD polish — all gauges, exoplanet data, galaxy map |
-| 8 | Game states — main menu, pause, save/load, game over |
-| 9 | Multiple ships — config ships, ship selector, tech slots |
-| 10 | Weapons & Combat — energy weapons, subsystem damage |
-| 11 | Alien Encounters — Federation dialogue, tech gifts, reputation |
-| 12 | Tech Tree & Earth R&D — tree UI, gift deposit, unlock system |
-| 13 | Sensors & Detection — physics-based detection, energy detector module |
-| 14 | Audio — ambient, engine, warp, Spirit Realm soundscape |
-| 15 | Spirit Realm — visual layer, realm entry (stargate + drive), crossing effect |
-| 16 | Spirit Realm content — Earth spirit city, alien structures, SR alien ships |
-| 17 | Polish — LOD tuning, Spirit Realm LOD, full QA pass |
-| 18+ | Future: third-person camera, landing mode hook, satellite toggle, lore expansion |
+
+**— PHASE 1: SPACE SIMULATION (Sandbox Mode) —**
+*Simulation complete and QA-signed before any Phase 2 work begins.*
+
+| Sprint | Epic | Focus |
+|---|---|---|
+| 1-1 | EP-01 | Foundation: build pipeline, data download + validation, window |
+| 1-2 | EP-02 | Star field: HYG data, spectral color, magnitude size |
+| 1-3 | EP-02 | LOD benchmarking; skybox: Milky Way panorama + nebula shader |
+| 1-4 | EP-02 | Solar System: planets, moons, orbital rings, NASA textures |
+| 1-5 | EP-03 | Planetary flight (Mode 3): 6-DOF controls, config, gravity warning |
+| 1-6 | EP-03 | System Warp (Mode 2): warp curve, lockout zone |
+| 1-7 | EP-03 | Super Warp (Mode 1): star selection, tunnel effect |
+| 1-8 | EP-05 | Core HUD: speed, nearest body, minimap, alerts |
+| 1-9 | EP-05 | Galaxy/star map with LY filters, click-to-target |
+| 1-10 | EP-06 | Simulation framework: main menu (mode select), settings, save position, time warp |
+| 1-11 | EP-12 | Player ship model (AI-generated + Blender) |
+
+> **PHASE 1 QA MILESTONE** — Full simulation playthrough required. Owner sign-off gates Phase 2.
+
+**— PHASE 2: GAME LAYER (Game Mode) —**
+*Adds all gameplay on top of the proven simulation engine.*
+
+| Sprint | Epic | Focus |
+|---|---|---|
+| 2-1 | EP-04 | Energy pool, allocation UI, shield bubble |
+| 2-2 | EP-04 | Hull damage model, multi-ship config (ships.json) |
+| 2-3 | EP-06 | Game states: ship selector, full save/load, game over |
+| 2-4 | EP-07 | Energy weapons, physics-based detection, red alert |
+| 2-5 | EP-07 | Realm-crossing shimmer effect, subsystem damage |
+| 2-6 | EP-05 | HUD additions: energy/shield/hull gauges, allocation bars, combat alerts |
+| 2-7 | EP-08 | Alien spawning, faction split, encounter trigger |
+| 2-8 | EP-08 | Dialogue system, tech gift UI, race portraits |
+| 2-9 | EP-08 | Reputation system, mission recovery, intro narrative event |
+| 2-10 | EP-09 | Tech tree structure, UI, data definitions |
+| 2-11 | EP-09 | Alien gift inventory, Earth R&D loop, permanent unlocks |
+| 2-12 | EP-10 | Spirit Realm render layer (scene overlay) |
+| 2-13 | EP-10 | Spirit Realm content: Earth city layer, planet hubs, star activity |
+| 2-14 | EP-10 | Realm entry mechanics: SR drive + stargate |
+| 2-15 | EP-11 | Audio: ambient, engine, warp, Spirit Realm soundscape |
+| 2-16 | EP-12 | Alien ship models, race portrait images, HUD icons |
+| 2-17 | — | Full integration polish, LOD tuning, QA pass |
+| 2-18+ | — | Future: third-person camera, landing hook, satellites toggle |
 
 ### Architecture Notes for Future Expansion
 - **Spirit Realm**: designed as a scene layer toggle — same world, second render pass; adding Spirit Realm content doesn't restructure the spatial engine
