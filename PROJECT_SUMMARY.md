@@ -1,6 +1,6 @@
 # Spirit Space — Project Summary
 
-> Version: 0.4 — 2026-04-04
+> Version: 0.5 — 2026-04-12
 
 ---
 
@@ -10,15 +10,17 @@ Spirit Space is a realistic space simulation game built on real astronomical dat
 
 ---
 
-## Development Philosophy — Simulation First
+## Development Philosophy — Engine First, Then Simulation, Then Game
 
-The project is built in **two distinct phases**:
+The project is built in **three distinct phases**:
 
-**Phase 1 — Space Simulation** is completed and stable before any game mechanics are introduced. The result is a fully functional real-universe simulation: accurate stars, real planet positions, all flight modes, time control, and free exploration. This phase produces **Sandbox Mode** — a clean, gameplay-free experience that stands on its own.
+**Phase 1 — Game Engine** is completed first. The result is a standalone, reusable engine with zero domain knowledge: ECS (EnTT), OpenGL renderer, asset loader, audio backend, input system, config system, HUD framework, save/load framework, game state machine, and time system. Any game could be built from it.
 
-**Phase 2 — Game Layer** adds all gameplay on top of the proven simulation foundation: energy systems, combat, alien factions, tech progression, and the Spirit Realm. This produces **Game Mode**.
+**Phase 2 — Star Simulation** proves the engine by building a fully functional real-universe simulation on top of it: accurate stars, real planet positions, all flight modes, time control, and free exploration. This phase produces **Sandbox Mode** — a clean, gameplay-free experience that stands on its own.
 
-The two modes coexist in the shipped product. Sandbox Mode is never removed — it remains the pure simulation experience.
+**Phase 3 — Spirit Space Game** adds all gameplay on top of the proven simulation: energy systems, combat, alien factions, tech progression, and the Spirit Realm. This produces **Game Mode**.
+
+The three phases are strictly sequential — each phase gates the next. Sandbox Mode is never removed from the shipped product — it remains the pure simulation experience.
 
 ---
 
@@ -448,53 +450,58 @@ New ships and tech upgrades added without recompiling.
 
 ### Sprint Roadmap
 
-**— PHASE 1: SPACE SIMULATION (Sandbox Mode) —**
-*Simulation complete and QA-signed before any Phase 2 work begins.*
+**— PHASE 1: GAME ENGINE —**
+*Engine complete and QA-signed before any Phase 2 work begins.*
 
 | Sprint | Epic | Focus |
 |---|---|---|
-| 1-1 | EP-01 | Foundation: build pipeline, data download + validation, window |
-| 1-2 | EP-02 | Star field: HYG data, spectral color, magnitude size |
-| 1-3 | EP-02 | LOD benchmarking; skybox: Milky Way panorama + nebula shader |
-| 1-4 | EP-02 | Solar System: planets, moons, orbital rings, NASA textures |
-| 1-5 | EP-03 | Planetary flight (Mode 3): 6-DOF controls, config, gravity warning |
-| 1-6 | EP-03 | System Warp (Mode 2): warp curve, lockout zone |
-| 1-7 | EP-03 | Super Warp (Mode 1): star selection, tunnel effect |
-| 1-8 | EP-05 | Core HUD: speed, nearest body, minimap, alerts |
-| 1-9 | EP-05 | Galaxy/star map with LY filters, click-to-target |
-| 1-10 | EP-06 | Simulation framework: main menu (mode select), settings, save position, time warp |
-| 1-11 | EP-12 | Player ship model (AI-generated + Blender) |
+| P1-S01 | EP-ENG-01 | Build system, CI, vcpkg ✅ DONE |
+| P1-S02 | EP-ENG-01 | Window + OpenGL 4.5 context |
+| P1-S03–S06 | EP-ENG-02 | ECS, config, input, logging |
+| P1-S07–S09 | EP-ENG-03 | Shader/DSA, mesh/texture loading, camera interface |
+| P1-S10–S11 | EP-ENG-04 | HUD framework (ImGui), audio backend (miniaudio) |
+| P1-S12–S14 | EP-ENG-05 | State machine, save/load framework, time system |
 
-> **PHASE 1 QA MILESTONE** — Full simulation playthrough required. Owner sign-off gates Phase 2.
+> **PHASE 1 QA MILESTONE** — Smoke-test app (engine only, zero sim/game includes) must build and run. Owner sign-off gates Phase 2.
 
-**— PHASE 2: GAME LAYER (Game Mode) —**
-*Adds all gameplay on top of the proven simulation engine.*
+**— PHASE 2: STAR SIMULATION (Sandbox Mode) —**
+*Simulation complete and QA-signed before any Phase 3 work begins.*
 
 | Sprint | Epic | Focus |
 |---|---|---|
-| 2-1 | EP-04 | Energy pool, allocation UI, shield bubble |
-| 2-2 | EP-04 | Hull damage model, multi-ship config (ships.json) |
-| 2-3 | EP-06 | Game states: ship selector, full save/load, game over |
-| 2-4 | EP-07 | Energy weapons, physics-based detection, red alert |
-| 2-5 | EP-07 | Realm-crossing shimmer effect, subsystem damage |
-| 2-6 | EP-05 | HUD additions: energy/shield/hull gauges, allocation bars, combat alerts |
-| 2-7 | EP-08 | Alien spawning, faction split, encounter trigger |
-| 2-8 | EP-08 | Dialogue system, tech gift UI, race portraits |
-| 2-9 | EP-08 | Reputation system, mission recovery, intro narrative event |
-| 2-10 | EP-09 | Tech tree structure, UI, data definitions |
-| 2-11 | EP-09 | Alien gift inventory, Earth R&D loop, permanent unlocks |
-| 2-12 | EP-10 | Spirit Realm render layer (scene overlay) |
-| 2-13 | EP-10 | Spirit Realm content: Earth city layer, planet hubs, star activity |
-| 2-14 | EP-10 | Realm entry mechanics: SR drive + stargate |
-| 2-15 | EP-11 | Audio: ambient, engine, warp, Spirit Realm soundscape |
-| 2-16 | EP-12 | Alien ship models, race portrait images, HUD icons |
-| 2-17 | — | Full integration polish, LOD tuning, QA pass |
-| 2-18+ | — | Future: third-person camera, landing hook, satellites toggle |
+| P2-S01 | EP-SIM-01 | Data download + validation (HYG, Horizons, exoplanets) |
+| P2-S02–S03 | EP-SIM-02 | Star field: HYG data, spectral colour, magnitude, LOD |
+| P2-S04 | EP-SIM-03 | Skybox: Milky Way panorama + nebula shader |
+| P2-S05 | EP-SIM-04 | Solar System: planets, moons, orbital rings, NASA textures |
+| P2-S06–S08 | EP-SIM-05 | All three flight modes (Mode 3, Mode 2, Mode 1) |
+| P2-S09–S11 | EP-SIM-06 | Simulation HUD, minimap, galaxy/star map |
+| P2-S12–S14 | EP-SIM-07 | Main menu, settings, save position, time warp |
+| P2-S15 | EP-SIM-08 | Player ship model (AI-generated + Blender) |
 
-### Architecture Notes for Future Expansion
-- **Spirit Realm**: designed as a scene layer toggle — same world, second render pass; adding Spirit Realm content doesn't restructure the spatial engine
-- **Landing**: gravity zone collision hooks in place from Sprint 3
-- **Third-person camera**: abstracted behind interface from Sprint 3
+> **PHASE 2 QA MILESTONE** — Full simulation playthrough required. Owner sign-off gates Phase 3.
+
+**— PHASE 3: SPIRIT SPACE GAME (Game Mode) —**
+*Adds all gameplay on top of the proven simulation.*
+
+| Sprint | Epic | Focus |
+|---|---|---|
+| P3-S01–S03 | EP-GAME-01 | Energy pool, shields, hull damage, multi-ship config |
+| P3-S04–S06 | EP-GAME-02 | Ship selector, full save/load, game over, pause menu |
+| P3-S07–S09 | EP-GAME-03 | Energy weapons, physics-based detection, realm crossing |
+| P3-S10–S11 | EP-GAME-04 | HUD game extensions, alien contact panel |
+| P3-S12–S15 | EP-GAME-05 | Alien spawning, dialogue, reputation, intro narrative |
+| P3-S16–S18 | EP-GAME-06 | Tech tree, gift inventory, Earth R&D loop |
+| P3-S19–S21 | EP-GAME-07 | Spirit Realm render layer, content, entry mechanics |
+| P3-S22–S23 | EP-GAME-08 | Full audio: ambient, flight, combat, Spirit Realm |
+| P3-S24–S25 | EP-GAME-09 | Alien ship models, race portraits, HUD icons |
+| P3-S26 | — | Full integration polish, LOD tuning, QA pass |
+| P3-S27+ | — | Future: third-person camera, landing hook, satellite toggle |
+
+### Architecture Notes
+- **Engine boundary**: `engine/` headers contain zero game/sim domain types; enforced by the Phase 1 smoke-test
+- **Spirit Realm**: second render pass toggle — same coordinate system, no spatial engine duplication
+- **Landing**: gravity zone collision hooks in place from sim flight sprint
+- **Third-person camera**: ICamera interface in place from Phase 1 — swap implementation, no flight code changes
 - **New ships**: fully data-driven via `config/ships.json`
 - **New alien races**: data-driven faction definitions (TBD config schema)
 
@@ -523,4 +530,4 @@ New ships and tech upgrades added without recompiling.
 
 ---
 
-*Document version: 0.3 — 2026-04-04*
+*Document version: 0.5 — 2026-04-12*

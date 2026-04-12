@@ -8,9 +8,10 @@ Read it fully before doing any work. It replaces the need to re-read all project
 ## Project in One Paragraph
 
 Spirit Space is a C++17 / OpenGL 4.5 space simulation game using real astronomical data.
-Built in **two phases**: Phase 1 = standalone space simulation (Sandbox Mode, no gameplay).
-Phase 2 = game layer on top (Game Mode: aliens, combat, energy, Spirit Realm).
-Phase 2 does not begin until Phase 1 passes owner QA sign-off.
+Built in **three phases**: Phase 1 = reusable game engine (ECS, renderer, audio, input, config, HUD, save, state machine).
+Phase 2 = star simulation proving the engine (Sandbox Mode: real stars, solar system, all flight modes, no gameplay).
+Phase 3 = Spirit Space game layer on top (Game Mode: aliens, combat, energy, Spirit Realm).
+Each phase gates the next — no phase begins until the previous passes owner QA sign-off.
 Tech stack is **fully locked** — never ask about library choices.
 All requirements trace to `REQUIREMENTS.md`. All sprint specs live in `EPICS.md`.
 
@@ -151,12 +152,19 @@ Never implement Phase 2 features during Phase 1 sprints.
 
 **Always know which phase we are in before writing any code.**
 
-| Phase | Mode | Includes | Excludes |
-|---|---|---|---|
-| 1 | Sandbox | Rendering, flight, HUD, save position, time warp | Energy, shields, damage, aliens, tech tree, Spirit Realm |
-| 2 | Game | Everything in Phase 1 + all gameplay | Nothing — full game |
+| Phase | Name | `engine/` | `sim/` | `game/` | Key Rule |
+|---|---|---|---|---|---|
+| 1 | Game Engine | Building | — | — | Zero sim/game domain types in `engine/` headers |
+| 2 | Star Simulation | Done | Building | — | No energy, combat, aliens, or Spirit Realm content |
+| 3 | Spirit Space Game | Done | Done | Building | Full game — all features allowed |
 
-If a Phase 1 sprint is active and a feature belongs to Phase 2, note it as a future hook and move on. Do not implement it.
+**Directory structure produced:**
+- `engine/` — reusable, zero domain knowledge
+- `sim/` — star simulation, built on engine
+- `game/` — Spirit Space game, built on engine + sim
+
+If a Phase 1 sprint is active and something belongs to Phase 2 or 3, note it as a future hook and move on.
+If a Phase 2 sprint is active and something belongs to Phase 3, note it as a future hook and move on.
 
 ---
 
@@ -164,14 +172,19 @@ If a Phase 1 sprint is active and a feature belongs to Phase 2, note it as a fut
 
 At the end of every sprint, present the QA checklist from `EPICS.md` for that sprint.
 Do not proceed to the next sprint until the owner responds with sign-off.
-The Phase 1 QA Milestone is a hard gate — present the full Phase 1 checklist and wait for explicit approval before any Phase 2 work begins.
+
+**Phase 1 QA Milestone** is a hard gate: smoke-test app (engine only, zero sim/game includes) must build and run. Wait for explicit owner approval before any Phase 2 work begins.
+
+**Phase 2 QA Milestone** is a hard gate: full simulation playthrough by owner. Wait for explicit owner approval before any Phase 3 work begins.
 
 ---
 
 ## What NOT to Do
 
 - Do not ask about tech stack choices — they are locked
-- Do not implement Phase 2 features in Phase 1 sprints
+- Do not implement Phase 2 or 3 features in Phase 1 sprints
+- Do not implement Phase 3 features in Phase 2 sprints
+- Do not add game-domain types (`CStar`, `CShip`, etc.) to `engine/` headers
 - Do not start a sprint without reading its spec from `EPICS.md`
 - Do not start the next sprint without owner QA sign-off
 - Do not add features beyond the sprint's acceptance criteria
