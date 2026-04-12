@@ -23,12 +23,15 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
-# ── vcpkg packages (populated per sprint) ────────────────────────────────────
-# EP-01-S01: none yet — GTest via FetchContent
-# EP-01-S02: glfw3, glad, glm, entt
-# EP-01-S03: nlohmann-json, fast-cpp-csv, curl, tinyxml2, stb
-# EP-02+:    assimp, fastnoise2, imgui
-# EP-11+:    miniaudio
+# ── vcpkg dependency timeline ─────────────────────────────────────────────────
+# P1-S01: none — GTest via FetchContent
+# P1-S02: glad, glfw3, glm              ← current sprint
+# P1-S03: entt, nlohmann-json
+# P1-S05: (input bindings — no new dep)
+# P1-S07: (shader system — no new dep)
+# P1-S08: assimp, stb
+# P1-S10: imgui
+# P1-S11: miniaudio
 
 # ── Google Test (FetchContent — no vcpkg needed) ──────────────────────────────
 include(FetchContent)
@@ -37,22 +40,23 @@ FetchContent_Declare(
     URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
-# Prevent overriding the parent project's compiler/linker settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+# ── Engine static library ─────────────────────────────────────────────────────
+# Defines 'engine' target; pulls in glad, glfw, glm as PUBLIC dependencies.
+# Consumers that link 'engine' automatically get those include dirs + libs.
+add_subdirectory(engine)
 
 # ── Main executable ───────────────────────────────────────────────────────────
 add_executable(spirit_space
     src/main.cpp
 )
 
-target_include_directories(spirit_space PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
-)
-
+target_link_libraries(spirit_space PRIVATE engine)
 target_compile_features(spirit_space PRIVATE cxx_std_17)
 
-# Copy config directory next to the executable
+# Copy config directory next to the executable after every build.
 add_custom_command(TARGET spirit_space POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/config
@@ -63,20 +67,27 @@ add_custom_command(TARGET spirit_space POST_BUILD
 # ── Tests ─────────────────────────────────────────────────────────────────────
 enable_testing()
 
+# --- Smoke tests (P1-S01) ---
+# No engine dependency — must always pass on CI regardless of GPU driver.
 add_executable(spirit_space_tests
     tests/test_smoke.cpp
 )
-
 target_include_directories(spirit_space_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/src
 )
-
-target_link_libraries(spirit_space_tests
-    PRIVATE
-    GTest::gtest_main
-)
-
+target_link_libraries(spirit_space_tests PRIVATE GTest::gtest_main)
 target_compile_features(spirit_space_tests PRIVATE cxx_std_17)
+
+# --- Engine tests (P1-S02+) ---
+# Links engine, so glad/glfw/glm are available. Tests that require an actual
+# OpenGL 4.5 driver call GTEST_SKIP() when the context cannot be created
+# (i.e., on CI runners without a GPU driver) — skip ≠ failure in ctest.
+add_executable(engine_tests
+    tests/engine/test_window_context.cpp
+)
+target_link_libraries(engine_tests PRIVATE engine GTest::gtest_main)
+target_compile_features(engine_tests PRIVATE cxx_std_17)
 
 include(GoogleTest)
 gtest_discover_tests(spirit_space_tests)
+gtest_discover_tests(engine_tests)
