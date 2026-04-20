@@ -7,10 +7,14 @@
 #include "engine/core/Window.h"
 #include "engine/render/Shader.h"
 
+#include <fstream>
+#include <cstdio>
+#include <string>
+
 // ── EP-ENG-03-S01 — Shader compile tests ─────────────────────────────────────
 //
-// These tests require an OpenGL 4.5 context.  They call GTEST_SKIP() when no
-// compatible GPU driver is available (expected behaviour on CI).
+// Shader GLSL is written to temp files at runtime so tests are working-directory
+// independent — the binary can be run from any directory.
 
 namespace {
 
@@ -24,12 +28,32 @@ engine::Window::Config hiddenConfig()
     return cfg;
 }
 
-// Paths are relative to the project root; tests are run from the build
-// directory, but the Makefile copies shaders alongside the binary.
-// For development builds invoked directly, we use the repo path.
-// Both are tried; the first that works is used.
-constexpr const char* VERT_PATH = "src/shaders/test_quad.vert";
-constexpr const char* FRAG_PATH = "src/shaders/test_quad.frag";
+static const char* k_vertSrc = R"glsl(
+#version 450 core
+layout(location = 0) in vec2 aPos;
+void main() {
+    gl_Position = vec4(aPos, 0.0, 1.0);
+}
+)glsl";
+
+static const char* k_fragSrc = R"glsl(
+#version 450 core
+out vec4 fragColor;
+uniform vec3 uColor;
+void main() {
+    fragColor = vec4(uColor, 1.0);
+}
+)glsl";
+
+// Writes src to a temp file and returns the path. Returns "" on failure.
+std::string writeTempShader(const char* name, const char* src)
+{
+    std::string path = std::string(std::tmpnam(nullptr)) + name;
+    std::ofstream f(path);
+    if (!f) return "";
+    f << src;
+    return path;
+}
 
 } // namespace
 
@@ -38,16 +62,23 @@ constexpr const char* FRAG_PATH = "src/shaders/test_quad.frag";
 TEST(ShaderCompile, LoadValidShaders)
 {
     engine::Window window(hiddenConfig());
-
     if (!window.isContextValid()) {
-        GTEST_SKIP() << "OpenGL 4.5 context unavailable "
-                        "(no compatible GPU driver — expected on CI)";
+        GTEST_SKIP() << "OpenGL 4.5 context unavailable — expected on CI";
+    }
+
+    const std::string vert = writeTempShader("_ss_test.vert", k_vertSrc);
+    const std::string frag = writeTempShader("_ss_test.frag", k_fragSrc);
+    if (vert.empty() || frag.empty()) {
+        GTEST_SKIP() << "Could not write temp shader files";
     }
 
     engine::Shader shader;
-    const bool ok = shader.loadFromFiles(VERT_PATH, FRAG_PATH);
+    const bool ok = shader.loadFromFiles(vert, frag);
 
-    EXPECT_TRUE(ok)       << "loadFromFiles should succeed with valid GLSL";
+    std::remove(vert.c_str());
+    std::remove(frag.c_str());
+
+    EXPECT_TRUE(ok)              << "loadFromFiles should succeed with valid GLSL";
     EXPECT_TRUE(shader.isValid()) << "isValid() should be true after successful load";
 }
 
@@ -56,19 +87,24 @@ TEST(ShaderCompile, LoadValidShaders)
 TEST(ShaderCompile, BindUnbind)
 {
     engine::Window window(hiddenConfig());
-
     if (!window.isContextValid()) {
-        GTEST_SKIP() << "OpenGL 4.5 context unavailable "
-                        "(no compatible GPU driver — expected on CI)";
+        GTEST_SKIP() << "OpenGL 4.5 context unavailable — expected on CI";
+    }
+
+    const std::string vert = writeTempShader("_ss_bind.vert", k_vertSrc);
+    const std::string frag = writeTempShader("_ss_bind.frag", k_fragSrc);
+    if (vert.empty() || frag.empty()) {
+        GTEST_SKIP() << "Could not write temp shader files";
     }
 
     engine::Shader shader;
-    if (!shader.loadFromFiles(VERT_PATH, FRAG_PATH)) {
-        GTEST_SKIP() << "Shader source files not found — run from project root";
-    }
+    const bool ok = shader.loadFromFiles(vert, frag);
+    std::remove(vert.c_str());
+    std::remove(frag.c_str());
 
-    EXPECT_GT(shader.programId(), 0u) << "programId() must be non-zero";
+    if (!ok) GTEST_SKIP() << "Shader compilation failed";
 
+    EXPECT_GT(shader.programId(), 0u);
     EXPECT_NO_FATAL_FAILURE(shader.bind());
     EXPECT_NO_FATAL_FAILURE(shader.unbind());
 }
