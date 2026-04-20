@@ -8,7 +8,6 @@
 #include "engine/render/Shader.h"
 
 #include <fstream>
-#include <cstdio>
 #include <string>
 
 // ── EP-ENG-03-S01 — Shader compile tests ─────────────────────────────────────
@@ -45,14 +44,15 @@ void main() {
 }
 )glsl";
 
-// Writes src to a temp file and returns the path. Returns "" on failure.
-std::string writeTempShader(const char* name, const char* src)
+// Writes src to a file in the current directory. Returns "" on failure.
+// Using cwd (not tmpnam) avoids Windows temp-path issues when the binary
+// is run via WSL interop — cwd is always writable in that context.
+std::string writeTempShader(const char* filename, const char* src)
 {
-    std::string path = std::string(std::tmpnam(nullptr)) + name;
-    std::ofstream f(path);
+    std::ofstream f(filename);
     if (!f) return "";
     f << src;
-    return path;
+    return filename;
 }
 
 } // namespace
@@ -66,8 +66,8 @@ TEST(ShaderCompile, LoadValidShaders)
         GTEST_SKIP() << "OpenGL 4.5 context unavailable — expected on CI";
     }
 
-    const std::string vert = writeTempShader("_ss_test.vert", k_vertSrc);
-    const std::string frag = writeTempShader("_ss_test.frag", k_fragSrc);
+    const std::string vert = writeTempShader("_ss_vert.glsl", k_vertSrc);
+    const std::string frag = writeTempShader("_ss_frag.glsl", k_fragSrc);
     if (vert.empty() || frag.empty()) {
         GTEST_SKIP() << "Could not write temp shader files";
     }
@@ -91,8 +91,8 @@ TEST(ShaderCompile, BindUnbind)
         GTEST_SKIP() << "OpenGL 4.5 context unavailable — expected on CI";
     }
 
-    const std::string vert = writeTempShader("_ss_bind.vert", k_vertSrc);
-    const std::string frag = writeTempShader("_ss_bind.frag", k_fragSrc);
+    const std::string vert = writeTempShader("_ss_vert.glsl", k_vertSrc);
+    const std::string frag = writeTempShader("_ss_frag.glsl", k_fragSrc);
     if (vert.empty() || frag.empty()) {
         GTEST_SKIP() << "Could not write temp shader files";
     }
