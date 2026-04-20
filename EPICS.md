@@ -281,14 +281,14 @@ TRACK F3 — AUDIO & ASSETS (parallel, independent)
 | Unit Tests | `test_imgui_init`; `test_panel_lifecycle` |
 | QA Gate | Owner docks/undocks test panels; confirms layout persists |
 
-#### EP-ENG-04-S02 — Audio Backend
+#### EP-ENG-04-S02 — Audio Backend ✅ DONE
 | Item | Detail |
 |---|---|
 | Goal | miniaudio integration; play/stop/volume API; positional audio stubs |
 | Deliverables | `engine/src/audio/AudioSystem.cpp`, miniaudio single-header via vcpkg |
 | Acceptance | Audio file plays; volume control works; no crash on missing file; API surface is generic (no game audio types) |
 | Unit Tests | `test_audio_play_stop`; `test_audio_volume`; `test_audio_missing_file_no_crash` |
-| QA Gate | Owner hears a test audio clip play and stop on keypress |
+| QA Gate | ✅ Owner heard 440Hz beep play and stop on P keypress — sign-off 2026-04-19 |
 
 ---
 

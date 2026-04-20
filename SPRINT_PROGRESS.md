@@ -28,7 +28,7 @@
 
 ---
 
-## EP-ENG-04-S02 — Audio Backend  ⏳ AWAITING QA SIGN-OFF
+## EP-ENG-04-S02 — Audio Backend  ✅ COMPLETE — 2026-04-19
 
 ### Deliverables ✅ All built
 
@@ -49,11 +49,4 @@
 | No crash on missing file | ✅ | Unit test confirmed |
 | Volume control + clamping | ✅ | Unit tests confirmed |
 | API generic (no game types) | ✅ | |
-| **QA Gate: owner hears beep on P keypress** | ⏳ | Pending owner confirmation |
-
----
-
-## How to complete EP-ENG-04-S02 QA
-
-Run `spirit_space.exe`, press **P** — confirm you hear a 440Hz beep. Press **P** again — confirm it stops.
-Report back to close this sprint.
+| **QA Gate: owner hears beep on P keypress** | ✅ | Owner heard 440Hz beep — sign-off 2026-04-19 |
