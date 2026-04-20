@@ -1,14 +1,14 @@
 // EP-ENG-01-S02: Window & OpenGL Context
-// Demonstrates: GLFW window, OpenGL 4.5 core context, red triangle via DSA.
+// EP-ENG-04-S02: Audio Backend demo (P = play/stop beep)
 //
-// The shader system (file-based GLSL, hot-reload) is deferred to EP-ENG-03-S01.
-// Shaders are embedded as string literals here for this sprint only.
+// Shader system deferred to EP-ENG-03-S01 (inline GLSL for now).
 
 // glad MUST precede GLFW — see engine/src/core/Window.cpp for explanation.
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "engine/core/Window.h"
+#include "engine/audio/AudioSystem.h"
 
 #include <array>
 #include <iostream>
@@ -108,6 +108,16 @@ int main()
     std::cout << "Vendor:  " << glGetString(GL_VENDOR)   << '\n';
     std::cout << "GLSL:    " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
 
+    // ── Audio backend (EP-ENG-04-S02) ────────────────────────────────────────
+    engine::AudioSystem audio;
+    if (audio.isReady()) {
+        audio.loadClip("beep", "assets/audio/test_beep.wav");
+        std::cout << "Audio:   ready  |  P: play/stop beep\n";
+    } else {
+        std::cout << "Audio:   unavailable (no device)\n";
+    }
+    bool audioPlaying = false;
+
     // ── Red triangle — NDC coordinates, OpenGL 4.5 DSA ───────────────────────
     static constexpr std::array<float, 6> vertices = {
         -0.5f, -0.5f,   // bottom-left
@@ -142,6 +152,12 @@ int main()
 
     // ── Render loop ───────────────────────────────────────────────────────────
     while (window.isOpen()) {
+        // P key: toggle beep play/stop
+        if (glfwGetKey(window.handle(), GLFW_KEY_P) == GLFW_PRESS && audio.isReady()) {
+            if (audioPlaying) { audio.stop("beep"); audioPlaying = false; }
+            else              { audio.play("beep"); audioPlaying = true;  }
+        }
+
         glClearColor(0.05f, 0.05f, 0.10f, 1.0f);  // dark-navy background
         glClear(GL_COLOR_BUFFER_BIT);
 

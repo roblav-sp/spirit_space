@@ -5,6 +5,8 @@
   "dependencies": [
     "glad",
     "glfw3",
-    "glm"
+    "glm",
+    "gtest",
+    "miniaudio"
   ]
 }
