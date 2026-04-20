@@ -9,7 +9,7 @@
 #
 # Usage:
 #   make              build spirit_space.exe
-#   make tests        build test executables
+#   make tests        build all test executables
 #   make clean        remove build/
 #   make setup        bootstrap vcpkg (if missing) + install deps
 #   make help         list targets
@@ -46,8 +46,16 @@ BIN_DIR := $(BUILD)/bin
 OBJ_DIR := $(BUILD)/obj
 
 # ── Engine static library ─────────────────────────────────────────────────────
-ENGINE_SRCS := engine/src/core/Window.cpp \
-               engine/src/audio/AudioSystem.cpp
+ENGINE_SRCS := \
+	engine/src/core/Window.cpp \
+	engine/src/audio/AudioSystem.cpp \
+	engine/src/ecs/World.cpp \
+	engine/src/core/Config.cpp \
+	engine/src/core/GameStateMachine.cpp \
+	engine/src/render/Shader.cpp \
+	engine/src/render/GpuBuffer.cpp \
+	engine/src/hud/HudSystem.cpp
+
 ENGINE_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(ENGINE_SRCS))
 ENGINE_LIB  := $(BUILD)/libengine.a
 
@@ -57,20 +65,66 @@ APP_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(APP_SRCS))
 APP_BIN  := $(BIN_DIR)/spirit_space.exe
 
 # ── Test executables ──────────────────────────────────────────────────────────
-SMOKE_SRCS    := tests/test_smoke.cpp
-SMOKE_OBJS    := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SMOKE_SRCS))
-SMOKE_BIN     := $(BIN_DIR)/spirit_space_tests.exe
 
+# Smoke — no engine deps
+SMOKE_SRCS := tests/test_smoke.cpp
+SMOKE_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SMOKE_SRCS))
+SMOKE_BIN  := $(BIN_DIR)/spirit_space_tests.exe
+
+# Window / GL context
 ENG_TEST_SRCS := tests/engine/test_window_context.cpp
 ENG_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(ENG_TEST_SRCS))
 ENG_TEST_BIN  := $(BIN_DIR)/engine_tests.exe
 
+# Audio
 AUDIO_TEST_SRCS := tests/engine/audio/test_audio_system.cpp
 AUDIO_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(AUDIO_TEST_SRCS))
 AUDIO_TEST_BIN  := $(BIN_DIR)/audio_tests.exe
 
-ALL_OBJS := $(ENGINE_OBJS) $(APP_OBJS) $(SMOKE_OBJS) $(ENG_TEST_OBJS) $(AUDIO_TEST_OBJS)
-DEPS     := $(ALL_OBJS:.o=.d)
+# ECS (EP-ENG-02-S01)
+ECS_TEST_SRCS := \
+	tests/ecs/test_entity_lifecycle.cpp \
+	tests/ecs/test_component_add_remove.cpp \
+	tests/ecs/test_view_query.cpp
+ECS_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(ECS_TEST_SRCS))
+ECS_TEST_BIN  := $(BIN_DIR)/ecs_tests.exe
+
+# Config (EP-ENG-02-S02)
+CONFIG_TEST_SRCS := \
+	tests/core/test_config_read.cpp \
+	tests/core/test_config_missing_key_default.cpp \
+	tests/core/test_config_write_persist.cpp
+CONFIG_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(CONFIG_TEST_SRCS))
+CONFIG_TEST_BIN  := $(BIN_DIR)/config_tests.exe
+
+# Render / Shader / DSA (EP-ENG-03-S01)
+RENDER_TEST_SRCS := \
+	tests/render/test_shader_compile.cpp \
+	tests/render/test_shader_missing_file_error.cpp \
+	tests/render/test_dsa_buffer_upload.cpp
+RENDER_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(RENDER_TEST_SRCS))
+RENDER_TEST_BIN  := $(BIN_DIR)/render_tests.exe
+
+# HUD / ImGui (EP-ENG-04-S01)
+HUD_TEST_SRCS := \
+	tests/hud/test_imgui_init.cpp \
+	tests/hud/test_panel_lifecycle.cpp
+HUD_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(HUD_TEST_SRCS))
+HUD_TEST_BIN  := $(BIN_DIR)/hud_tests.exe
+
+# State Machine (EP-ENG-05-S01)
+SM_TEST_SRCS := \
+	tests/core/test_state_push_pop.cpp \
+	tests/core/test_state_lifecycle_hooks.cpp \
+	tests/core/test_empty_stack_safe.cpp
+SM_TEST_OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SM_TEST_SRCS))
+SM_TEST_BIN  := $(BIN_DIR)/statemachine_tests.exe
+
+ALL_OBJS := $(ENGINE_OBJS) $(APP_OBJS) \
+            $(SMOKE_OBJS) $(ENG_TEST_OBJS) $(AUDIO_TEST_OBJS) \
+            $(ECS_TEST_OBJS) $(CONFIG_TEST_OBJS) $(RENDER_TEST_OBJS) \
+            $(HUD_TEST_OBJS) $(SM_TEST_OBJS)
+DEPS := $(ALL_OBJS:.o=.d)
 
 # ── Phony targets ─────────────────────────────────────────────────────────────
 .PHONY: all tests setup clean help _check-deps
@@ -82,7 +136,7 @@ all: _check-deps $(APP_BIN)
 help:
 	@echo "Targets:"
 	@echo "  make            build $(APP_BIN)"
-	@echo "  make tests      build test executables"
+	@echo "  make tests      build all test executables"
 	@echo "  make setup      bootstrap vcpkg (if needed) + install deps"
 	@echo "  make clean      remove $(BUILD)/"
 
@@ -99,7 +153,7 @@ _check-deps:
 	fi
 
 $(APP_BIN): $(APP_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
-	$(CXX) $^ $(LDFLAGS) -lglad -lglfw3 $(WIN_LIBS) -o $@
+	$(CXX) $^ $(LDFLAGS) -limgui -lglad -lglfw3 $(WIN_LIBS) -o $@
 	@rm -rf $(BIN_DIR)/config && cp -r config $(BIN_DIR)/config
 	@rm -rf $(BIN_DIR)/assets && cp -r assets $(BIN_DIR)/assets
 
@@ -114,22 +168,39 @@ $(OBJ_DIR)/%.o: %.cpp
 $(BUILD) $(BIN_DIR):
 	@mkdir -p $@
 
-# ── Tests ─────────────────────────────────────────────────────────────────────
-# Smoke tests have no engine/GL dependency.
+# ── Test link rules ───────────────────────────────────────────────────────────
+GTEST_LIBS := -lgtest_main -lgtest -lpthread
+
 $(SMOKE_BIN): $(SMOKE_OBJS) | $(BIN_DIR)
-	$(CXX) $^ $(LDFLAGS) -lgtest_main -lgtest -lpthread $(WIN_LIBS) -o $@
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) $(WIN_LIBS) -o $@
 
-# Engine tests link the engine (brings in glad + glfw3).
 $(ENG_TEST_BIN): $(ENG_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
-	$(CXX) $^ $(LDFLAGS) -lgtest_main -lgtest -lglad -lglfw3 -lpthread $(WIN_LIBS) -o $@
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) -lglad -lglfw3 $(WIN_LIBS) -o $@
 
-# Audio tests link the engine (brings in miniaudio via AudioSystem).
 $(AUDIO_TEST_BIN): $(AUDIO_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
-	$(CXX) $^ $(LDFLAGS) -lgtest_main -lgtest -lglad -lglfw3 -lpthread $(WIN_LIBS) -o $@
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) -lglad -lglfw3 $(WIN_LIBS) -o $@
 
-tests: _check-deps $(SMOKE_BIN) $(ENG_TEST_BIN) $(AUDIO_TEST_BIN)
-	@echo "Test binaries built in $(BIN_DIR)/"
-	@echo "Run them on a Windows machine or via:  wine $(SMOKE_BIN)"
+$(ECS_TEST_BIN): $(ECS_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) $(WIN_LIBS) -o $@
+
+$(CONFIG_TEST_BIN): $(CONFIG_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) $(WIN_LIBS) -o $@
+
+$(RENDER_TEST_BIN): $(RENDER_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) -lglad -lglfw3 $(WIN_LIBS) -o $@
+
+$(HUD_TEST_BIN): $(HUD_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) -limgui -lglad -lglfw3 $(WIN_LIBS) -o $@
+
+$(SM_TEST_BIN): $(SM_TEST_OBJS) $(ENGINE_LIB) | $(BIN_DIR)
+	$(CXX) $^ $(LDFLAGS) $(GTEST_LIBS) $(WIN_LIBS) -o $@
+
+tests: _check-deps \
+       $(SMOKE_BIN) $(ENG_TEST_BIN) $(AUDIO_TEST_BIN) \
+       $(ECS_TEST_BIN) $(CONFIG_TEST_BIN) $(RENDER_TEST_BIN) \
+       $(HUD_TEST_BIN) $(SM_TEST_BIN)
+	@echo "All test binaries built in $(BIN_DIR)/"
+	@echo "Run them on a Windows machine."
 
 # ── First-time setup: install system tools, clone + bootstrap vcpkg, install deps
 setup:

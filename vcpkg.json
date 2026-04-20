@@ -7,6 +7,12 @@
     "glfw3",
     "glm",
     "gtest",
-    "miniaudio"
+    "miniaudio",
+    "entt",
+    "nlohmann-json",
+    {
+      "name": "imgui",
+      "features": ["docking-experimental", "opengl3-binding", "glfw-binding"]
+    }
   ]
 }
