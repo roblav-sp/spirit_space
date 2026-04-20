@@ -168,25 +168,25 @@ TRACK F3 — AUDIO & ASSETS (parallel, independent)
 ### EP-ENG-01 — Foundation
 **Phase**: 1 | **Track**: 0 (shared gate — all tracks blocked until this closes)
 **Goal**: Build system, CI, window opens, OpenGL 4.5 context confirmed.
-**Status**: EP-ENG-01-S01 COMPLETE.
+**Status**: ✅ ALL SPRINTS COMPLETE — owner sign-off 2026-04-19
 
 #### EP-ENG-01-S01 — Build System & Repository ✅ DONE
 | Item | Detail |
 |---|---|
-| Goal | CMake + vcpkg project, GitHub repo, CI pipeline |
-| Deliverables | `CMakeLists.txt`, `.github/workflows/ci.yml`, vcpkg manifest, GTest integrated |
-| Acceptance | `cmake --build` succeeds on Windows; CI green on push; empty test suite passes |
-| Unit Tests | Smoke: build artifact exists and runs |
-| QA Gate | Owner builds on own machine; CI confirmed green |
+| Goal | Makefile + vcpkg project, GitHub repo, CI pipeline |
+| Deliverables | `Makefile`, `.github/workflows/ci.yml`, vcpkg manifest, GTest integrated |
+| Acceptance | `make` succeeds in WSL; CI green on push; smoke tests pass |
+| Unit Tests | Smoke: 4/4 passed |
+| QA Gate | ✅ Owner builds confirmed; all smoke tests pass |
 
-#### EP-ENG-01-S02 — Window & OpenGL Context
+#### EP-ENG-01-S02 — Window & OpenGL Context ✅ DONE
 | Item | Detail |
 |---|---|
 | Goal | GLFW window, GLAD loads OpenGL 4.5 context, triangle renders |
 | Deliverables | `engine/src/core/Window.cpp`, GLFW + GLAD via vcpkg |
 | Acceptance | 1920×1080 window opens; red triangle renders; fullscreen toggle works; closes cleanly |
-| Unit Tests | `test_window_context`: GL version string ≥ 4.5; `test_fullscreen_toggle`: no crash |
-| QA Gate | Owner launches app and sees window |
+| Unit Tests | `test_window_context`: GL 4.5 ✅; `test_fullscreen_toggle`: no crash ✅ |
+| QA Gate | ✅ Owner confirmed: OpenGL 4.5.0 Intel, window opened, audio ready, all tests pass |
 
 ---
 
